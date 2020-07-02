@@ -2,7 +2,7 @@ import os.path
 from data.base_dataset import BaseDataset, get_params, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
-
+import numpy as np
 
 class AlignedDataset(BaseDataset):
     """A dataset class for paired image dataset.
@@ -38,7 +38,11 @@ class AlignedDataset(BaseDataset):
         """
         # read a image given a random integer index
         AB_path = self.AB_paths[index]
-        AB = Image.open(AB_path).convert('RGB')
+        #AB = Image.open(AB_path).convert('RGB')
+        AB_np = np.load(AB_path, allow_pickle=True)
+        print("shape: ", AB_np.shape)
+        AB = Image.fromarray(AB_np)
+        #AB = Image.fromarray((AB_np * 255).astype(np.uint8))
         # split AB image into A and B
         w, h = AB.size
         w2 = int(w / 2)

@@ -86,7 +86,7 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
         osize = [opt.load_size, opt.load_size]
         transform_list.append(transforms.Resize(osize, method))
     elif 'scale_width' in opt.preprocess:
-        transform_list.append(transforms.Lambda(lambda img: __scale_width(img, opt.load_size, opt.crop_size, method)))
+        transform_list.append(transforms.Lambda(lambda img: __scale_width(img, opt.load_size, method)))
 
     if 'crop' in opt.preprocess:
         if params is None:
@@ -95,7 +95,8 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
             transform_list.append(transforms.Lambda(lambda img: __crop(img, params['crop_pos'], opt.crop_size)))
 
     if opt.preprocess == 'none':
-        transform_list.append(transforms.Lambda(lambda img: __make_power_2(img, base=4, method=method)))
+        pass
+        #transform_list.append(transforms.Lambda(lambda img: __make_power_2(img, base=4, method=method)))
 
     if not opt.no_flip:
         if params is None:
@@ -108,27 +109,28 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
         if grayscale:
             transform_list += [transforms.Normalize((0.5,), (0.5,))]
         else:
-            transform_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+            transform_list += [transforms.Normalize((0.5, 0.5, 0.5, 0.5), (0.5, 0.5, 0.5, 0.5))]
     return transforms.Compose(transform_list)
 
 
 def __make_power_2(img, base, method=Image.BICUBIC):
+    print('img size: ', img.size)
     ow, oh = img.size
     h = int(round(oh / base) * base)
     w = int(round(ow / base) * base)
-    if h == oh and w == ow:
+    if (h == oh) and (w == ow):
         return img
 
     __print_size_warning(ow, oh, w, h)
     return img.resize((w, h), method)
 
 
-def __scale_width(img, target_size, crop_size, method=Image.BICUBIC):
+def __scale_width(img, target_width, method=Image.BICUBIC):
     ow, oh = img.size
-    if ow == target_size and oh >= crop_size:
+    if (ow == target_width):
         return img
-    w = target_size
-    h = int(max(target_size * oh / ow, crop_size))
+    w = target_width
+    h = int(target_width * oh / ow)
     return img.resize((w, h), method)
 
 

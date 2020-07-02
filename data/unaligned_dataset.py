@@ -3,7 +3,7 @@ from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
 import random
-
+import numpy as np
 
 class UnalignedDataset(BaseDataset):
     """
@@ -54,12 +54,17 @@ class UnalignedDataset(BaseDataset):
         else:   # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
-        A_img = Image.open(A_path).convert('RGB')
-        B_img = Image.open(B_path).convert('RGB')
+        A_img_np = np.load(A_path)
+        A_img = Image.fromarray(A_img_np)
+        B_img_np = np.load(B_path)
+        B_img = Image.fromarray(B_img_np)
+        # A_img = Image.open(A_path).convert('RGB')
+        # B_img = Image.open(B_path).convert('RGB')
         # apply image transformation
+        #A_img = np.array([np.load(A_path)]).astype(np.float32)
+        #B_img = np.array([np.load(B_path)]).astype(np.float32)
         A = self.transform_A(A_img)
         B = self.transform_B(B_img)
-
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
     def __len__(self):

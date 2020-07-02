@@ -53,15 +53,20 @@ def save_image(image_numpy, image_path, aspect_ratio=1.0):
         image_numpy (numpy array) -- input numpy array
         image_path (str)          -- the path of the image
     """
-
-    image_pil = Image.fromarray(image_numpy)
+    img_path = '.' + image_path.split('.')[1]
+    img_end = '.' + image_path.split('.')[-1]
+    rgb_image_pil = Image.fromarray(image_numpy[:,:,:3][...,::-1], mode="RGB")
+    depth_image_pil = Image.fromarray((image_numpy[:,:,-1]).astype(np.uint8), mode="L")
     h, w, _ = image_numpy.shape
 
     if aspect_ratio > 1.0:
-        image_pil = image_pil.resize((h, int(w * aspect_ratio)), Image.BICUBIC)
+        rgb_image_pil = rgb_image_pil.resize((h, int(w * aspect_ratio)), Image.BICUBIC)
+        depth_image_pil = depth_image_pil.resize((h, int(w * aspect_ratio)), Image.BICUBIC)
     if aspect_ratio < 1.0:
-        image_pil = image_pil.resize((int(h / aspect_ratio), w), Image.BICUBIC)
-    image_pil.save(image_path)
+        rgb_image_pil = rgb_image_pil.resize((int(h / aspect_ratio), w), Image.BICUBIC)
+        depth_image_pil = depth_image_pil.resize((int(h / aspect_ratio), w), Image.BICUBIC)
+    rgb_image_pil.save(img_path + '_rgb' + img_end)
+    depth_image_pil.save(img_path + '_depth' + img_end)
 
 
 def print_numpy(x, val=True, shp=False):
